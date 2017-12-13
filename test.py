@@ -3,10 +3,6 @@ import numpy as np
 from my_answers import NeuralNetwork
 
 
-def MSE(y, Y):
-    return np.mean((y - Y) ** 2)
-
-
 inputs = np.array([[0.5, -0.2, 0.1]])
 targets = np.array([[0.4]])
 test_w_i_h = np.array([[0.1, -0.2],
