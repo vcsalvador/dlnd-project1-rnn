@@ -79,16 +79,18 @@ class NeuralNetwork(object):
         error = y - final_outputs  # Output layer error is the difference between desired target and actual output.
 
         # Calculates the error term for the output layer.
-        output_error_term = error * final_outputs
+        output_error_term = error
+
         # Calculates the hidden layer's contribution to the error
-        hidden_error = output_error_term * self.weights_hidden_to_output
-        test = np.dot(hidden_error.T, hidden_outputs.T)
-        hidden_error_term = test * (1-hidden_outputs)[:, None]
+        hidden_error = output_error_term[:, None] * self.weights_hidden_to_output
+
+        # Calculates the error term for the hidden layer
+        hidden_error_term = hidden_error.T * (hidden_outputs * (1 - hidden_outputs)).T
 
         # Weight step (input to hidden)
-        delta_weights_i_h += X[:, None] * hidden_error_term.T
+        delta_weights_i_h += hidden_error_term * X[:, None]
         # Weight step (hidden to output)
-        delta_weights_h_o += hidden_outputs[:, None] * output_error_term.T
+        delta_weights_h_o += output_error_term * hidden_outputs[:, None]
 
         return delta_weights_i_h, delta_weights_h_o
 
@@ -102,8 +104,8 @@ class NeuralNetwork(object):
             :param n_records: number of records
 
         """
-        self.weights_hidden_to_output += learning_rate * delta_weights_h_o / n_records  # update hidden-to-output weights with gradient descent step
-        self.weights_input_to_hidden += learning_rate * delta_weights_i_h / n_records  # update input-to-hidden weights with gradient descent step
+        self.weights_hidden_to_output += self.lr / n_records * delta_weights_h_o  # update hidden-to-output weights with gradient descent step
+        self.weights_input_to_hidden += self.lr / n_records * delta_weights_i_h  # update input-to-hidden weights with gradient descent step
 
     def run(self, features):
         """ Run a forward pass through the network with input features
